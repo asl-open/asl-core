@@ -18,10 +18,16 @@ Configuration is loaded from environment variables (see
 DATABASE_DSN=postgres://postgres:postgres@localhost:5432/asl_core?sslmode=disable go run ./cmd
 ```
 
+Run migrations first (see [`../../migrations/README.md`](../../migrations/README.md)):
+
+```
+make migrate-up
+```
+
 ## Layout
 
 ```
-cmd/                        entry point (fx.New(internal.Module).Run())
+cmd/                         server entry point (fx.New(internal.Module).Run())
 internal/
 ├── gateway/                  clients for external services (not implemented yet)
 ├── repository/                domain entities and data access (not implemented yet)
