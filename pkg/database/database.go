@@ -28,6 +28,9 @@ type Conn interface {
 	Exec(ctx context.Context, sql string, args ...interface{}) (pgconn.CommandTag, error)
 	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
 	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
+	// Ping checks that the database is reachable. Used by the readiness
+	// endpoint (#10).
+	Ping(ctx context.Context) error
 }
 
 type Params struct {
@@ -94,4 +97,8 @@ func (c *conn) Query(ctx context.Context, sql string, args ...interface{}) (pgx.
 
 func (c *conn) QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row {
 	return c.pool.QueryRow(ctx, sql, args...)
+}
+
+func (c *conn) Ping(ctx context.Context) error {
+	return c.pool.Ping(ctx)
 }

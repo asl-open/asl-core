@@ -24,6 +24,15 @@ Run migrations first (see [`../../migrations/README.md`](../../migrations/README
 make migrate-up
 ```
 
+## Endpoints
+
+- `GET /health` — always `200 {"status":"ok"}` while the process is
+  running. Does not check dependencies.
+- `GET /ready` — `200 {"status":"ok"}` if dependencies (currently just the
+  database) are reachable, `503 {"status":"unavailable"}` otherwise.
+  Dependency checks have a 2s timeout. The underlying error is logged
+  server-side, never returned to the client.
+
 ## Layout
 
 ```
@@ -31,7 +40,10 @@ cmd/                         server entry point (fx.New(internal.Module).Run())
 internal/
 ├── gateway/                  clients for external services (not implemented yet)
 ├── repository/                domain entities and data access (not implemented yet)
-├── services/                  business logic and application errors (not implemented yet)
+├── services/                   business logic, aggregated in module.go
+│   └── health/                  Checker.Ready(ctx) error - currently just pings
+│                                the database; the one place that knows what
+│                                "ready" means as more dependencies are added
 ├── http/                       HTTP transport - Gin types stay inside this tree
 │   ├── module.go                builds the Gin engine, wraps it in *http.Server,
 │   │                            registers Fx lifecycle hooks (listen on OnStart,
@@ -42,10 +54,12 @@ internal/
 │   │                              completed request (recovery uses gin.Recovery())
 │   └── handlers/
 │       ├── module.go               aggregates every handler's fx module
-│       └── ping/                    example handler: Handler interface, struct, constructor,
-│                                    its own fx.Provide module, and a testify MockHandler
+│       └── health/                  Handler.Health/Ready - talks to
+│                                    internal/services/health, never touches
+│                                    pkg/database directly (handlers stay above
+│                                    the service layer, not beside it)
 └── module.go                  aggregates config.Module + logger.Module +
-                              database.Module + http.Module
+                              database.Module + services.Module + http.Module
 ```
 
 The PostgreSQL pool (`pkg/database`, not `internal/database` - shared
@@ -56,12 +70,14 @@ bad `DATABASE_DSN` or an unreachable database fails startup immediately.
 
 - **Layering**: each concern (`gateway`, `repository`, `services`, `http`)
   is its own package. Handlers only implement their request logic (e.g.
-  `Ping(c *gin.Context)`) and know nothing about `*gin.Engine` - route
-  registration is centralized in `internal/http/routes.go`.
+  `Ready(c *gin.Context)`) and know nothing about `*gin.Engine` - route
+  registration is centralized in `internal/http/routes.go`. Handlers depend
+  on `internal/services/*`, never directly on `pkg/database` or other
+  infra - business/dependency logic belongs in the service layer.
 - **Adding a handler**: create a subpackage under `internal/http/handlers/`
   with a `Handler` interface, a struct implementing it, a constructor, and
-  `var Module = fx.Provide(New)` (see `handlers/ping` as a template). Add it
-  to `handlers/module.go`'s `fx.Options(...)` list and wire its route in
+  `var Module = fx.Provide(New)` (see `handlers/health` as a template). Add
+  it to `handlers/module.go`'s `fx.Options(...)` list and wire its route in
   `routes.go`.
 - **Fx modules**: every package that needs to be wired into the app exposes
   its own `Module` (`fx.Provide`/`fx.Options`/`fx.Module`), aggregated one

@@ -14,7 +14,7 @@ import (
 
 	"github.com/asl-open/asl-core/pkg/config"
 	"github.com/asl-open/asl-core/services/api/internal/http/handlers"
-	"github.com/asl-open/asl-core/services/api/internal/http/handlers/ping"
+	"github.com/asl-open/asl-core/services/api/internal/http/handlers/health"
 	"github.com/asl-open/asl-core/services/api/internal/http/middleware"
 )
 
@@ -28,9 +28,9 @@ type Params struct {
 	fx.In
 	fx.Lifecycle
 
-	Config      config.Config
-	Middleware  middleware.Middleware
-	PingHandler ping.Handler
+	Config        config.Config
+	Middleware    middleware.Middleware
+	HealthHandler health.Handler
 }
 
 func New(p Params) error {

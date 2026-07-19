@@ -1,4 +1,4 @@
-package ping
+package health
 
 import (
 	"github.com/gin-gonic/gin"
@@ -9,7 +9,11 @@ type MockHandler struct {
 	mock.Mock
 }
 
-func (m *MockHandler) Ping(c *gin.Context) {
+func (m *MockHandler) Health(c *gin.Context) {
+	m.Called(c)
+}
+
+func (m *MockHandler) Ready(c *gin.Context) {
 	m.Called(c)
 }
 
