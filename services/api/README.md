@@ -11,10 +11,11 @@ go run ./cmd
 
 Configuration is loaded from environment variables (see
 [`.env.example`](.env.example)). `HTTP_ADDR` overrides the listen address
-(defaults to `:8080`), `LOGGER_LEVEL`/`LOGGER_FORMAT` control logging:
+(defaults to `:8080`), `LOGGER_LEVEL`/`LOGGER_FORMAT` control logging,
+`DATABASE_DSN` is required (PostgreSQL connection string):
 
 ```
-HTTP_ADDR=:8081 LOGGER_FORMAT=json go run ./cmd
+DATABASE_DSN=postgres://postgres:postgres@localhost:5432/asl_core?sslmode=disable go run ./cmd
 ```
 
 ## Layout
@@ -22,7 +23,6 @@ HTTP_ADDR=:8081 LOGGER_FORMAT=json go run ./cmd
 ```
 cmd/                        entry point (fx.New(internal.Module).Run())
 internal/
-├── database/                database connection and pool (not implemented yet)
 ├── gateway/                  clients for external services (not implemented yet)
 ├── repository/                domain entities and data access (not implemented yet)
 ├── services/                  business logic and application errors (not implemented yet)
@@ -38,12 +38,17 @@ internal/
 │       ├── module.go               aggregates every handler's fx module
 │       └── ping/                    example handler: Handler interface, struct, constructor,
 │                                    its own fx.Provide module, and a testify MockHandler
-└── module.go                  aggregates config.Module + logger.Module + http.Module
+└── module.go                  aggregates config.Module + logger.Module +
+                              database.Module + http.Module
 ```
+
+The PostgreSQL pool (`pkg/database`, not `internal/database` - shared
+infra like `pkg/config`/`pkg/logger`) is wired eagerly via `fx.Invoke` so a
+bad `DATABASE_DSN` or an unreachable database fails startup immediately.
 
 ## Conventions
 
-- **Layering**: each concern (`database`, `gateway`, `repository`, `services`, `http`)
+- **Layering**: each concern (`gateway`, `repository`, `services`, `http`)
   is its own package. Handlers only implement their request logic (e.g.
   `Ping(c *gin.Context)`) and know nothing about `*gin.Engine` - route
   registration is centralized in `internal/http/routes.go`.
@@ -57,3 +62,6 @@ internal/
   level up. `cmd/main.go` only ever calls `fx.New(internal.Module).Run()`.
 - **Config**: typed via `pkg/config` (env vars only, no config file). See
   that package for how to add a new setting.
+- **Shared infra lives in `pkg/`, not `internal/`**: `pkg/config`, `pkg/logger`
+  and `pkg/database` aren't specific to the `api` service - anything a future
+  service would also need goes there instead of under `services/api/internal`.
