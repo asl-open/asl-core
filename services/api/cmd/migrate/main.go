@@ -21,6 +21,18 @@ import (
 	"github.com/asl-open/asl-core/pkg/migration"
 )
 
+// defaultMigrationSource lives here, not in pkg/config - it names this
+// specific service's migration directory, so it isn't something the
+// shared config package (used by every future service) should know about.
+const defaultMigrationSource = "file://migrations/api"
+
+func migrationSource(cfg config.Config) string {
+	if v := cfg.GetString("migration.source"); v != "" {
+		return v
+	}
+	return defaultMigrationSource
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		log.Fatal("usage: migrate <create|up|down|version>")
@@ -40,7 +52,7 @@ func main() {
 			log.Fatal("usage: migrate create <name>")
 		}
 
-		dir := strings.TrimPrefix(cfg.GetString("migration.source"), "file://")
+		dir := strings.TrimPrefix(migrationSource(cfg), "file://")
 		up, down, err := migration.Create(dir, os.Args[2])
 		if err != nil {
 			log.Fatalf("failed to create migration: %v", err)
@@ -52,7 +64,7 @@ func main() {
 
 	// Errors below deliberately never include the DSN - it may contain
 	// credentials.
-	m, err := migration.New(cfg.GetString("migration.source"), cfg.GetString("database.dsn"))
+	m, err := migration.New(migrationSource(cfg), cfg.GetString("database.dsn"))
 	if err != nil {
 		log.Fatalf("failed to initialize migrate: %v", err)
 	}
