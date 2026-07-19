@@ -1,8 +1,8 @@
 # Migrations
 
 Each service that owns a database gets its own directory here
-(`migrations/<service>/`), managed with
-[golang-migrate](https://github.com/golang-migrate/migrate).
+(`migrations/<service>/`), managed with the
+[golang-migrate](https://github.com/golang-migrate/migrate) CLI.
 
 ## Naming convention
 
@@ -12,31 +12,24 @@ NNNNNN_description.down.sql
 ```
 
 `NNNNNN` is a zero-padded sequence number (`000001`, `000002`, ...). Every
-`up` migration has a matching `down` migration that reverses it.
+`up` migration has a matching `down` migration that reverses it. This is
+exactly what `migrate create -seq -digits 6` produces, see below.
 
 ## Commands
 
-There's no `migrate` CLI dependency - each service has its own
-`cmd/migrate` binary. For the `api` service, run from the repository root:
+Run from the repository root. `DATABASE_DSN` must be set for
+`up`/`down`/`version` (see `services/api/.env.example`); `migrate-create`
+only touches the filesystem, no database needed.
 
 ```
-go run ./services/api/cmd/migrate create <name>  # scaffold a new up/down pair
-go run ./services/api/cmd/migrate up             # apply all pending migrations
-go run ./services/api/cmd/migrate down           # roll back the last migration
-go run ./services/api/cmd/migrate version        # show the current version
+make migrate-create name=add_users_table  # scaffold a new up/down pair
+make migrate-up                           # apply all pending migrations
+make migrate-down                         # roll back the last migration
+make migrate-version                      # show the current version
 ```
 
-`create` only touches the filesystem (`MIGRATION_SOURCE`), no database
-needed. `up`/`down`/`version` need `DATABASE_DSN` set (see
-`services/api/.env.example`). These will get wrapped into
-`make migrate-up`/`make migrate-down`/etc. once the Makefile lands (#13).
-
-## Adding a migration
-
-```
-go run ./services/api/cmd/migrate create add_users_table
-```
-
-This creates `NNNNNN_add_users_table.up.sql`/`.down.sql` in the service's
-migration directory, continuing its existing sequence. Fill in the SQL by
-hand.
+The Makefile installs the `migrate` CLI itself the first time it's needed
+(`go install ... github.com/golang-migrate/migrate/v4/cmd/migrate`) - no
+manual setup required. These targets currently only cover the `api`
+service; the rest of the Makefile (run/build/test/lint/docker) lands with
+#13.

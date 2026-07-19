@@ -21,17 +21,14 @@ DATABASE_DSN=postgres://postgres:postgres@localhost:5432/asl_core?sslmode=disabl
 Run migrations first (see [`../../migrations/README.md`](../../migrations/README.md)):
 
 ```
-go run ./cmd/migrate up
+make migrate-up
 ```
 
 ## Layout
 
 ```
 cmd/
-├── api/                      server entry point (fx.New(internal.Module).Run())
-└── migrate/                   migration CLI (up/down/version) - separate from
-                               the server on purpose, migrations never run
-                               automatically on server startup
+└── api/                      server entry point (fx.New(internal.Module).Run())
 internal/
 ├── gateway/                  clients for external services (not implemented yet)
 ├── repository/                domain entities and data access (not implemented yet)
@@ -69,7 +66,7 @@ bad `DATABASE_DSN` or an unreachable database fails startup immediately.
   `routes.go`.
 - **Fx modules**: every package that needs to be wired into the app exposes
   its own `Module` (`fx.Provide`/`fx.Options`/`fx.Module`), aggregated one
-  level up. `cmd/main.go` only ever calls `fx.New(internal.Module).Run()`.
+  level up. `cmd/api/main.go` only ever calls `fx.New(internal.Module).Run()`.
 - **Config**: typed via `pkg/config` (env vars only, no config file). See
   that package for how to add a new setting.
 - **Shared infra lives in `pkg/`, not `internal/`**: `pkg/config`, `pkg/logger`
