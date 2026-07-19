@@ -29,6 +29,7 @@ func New() (Config, error) {
 	v.SetDefault("logger.format", "console")
 	v.SetDefault("database.max_open_conns", 10)
 	v.SetDefault("database.max_conn_lifetime", "1h")
+	v.SetDefault("migration.source", "file://migrations/api")
 
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()

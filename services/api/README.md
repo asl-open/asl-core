@@ -6,7 +6,7 @@ foundation/bootstrap work (Fx wiring, HTTP transport, configuration).
 ## Running
 
 ```
-go run ./cmd
+go run ./cmd/api
 ```
 
 Configuration is loaded from environment variables (see
@@ -15,13 +15,23 @@ Configuration is loaded from environment variables (see
 `DATABASE_DSN` is required (PostgreSQL connection string):
 
 ```
-DATABASE_DSN=postgres://postgres:postgres@localhost:5432/asl_core?sslmode=disable go run ./cmd
+DATABASE_DSN=postgres://postgres:postgres@localhost:5432/asl_core?sslmode=disable go run ./cmd/api
+```
+
+Run migrations first (see [`../../migrations/README.md`](../../migrations/README.md)):
+
+```
+go run ./cmd/migrate up
 ```
 
 ## Layout
 
 ```
-cmd/                        entry point (fx.New(internal.Module).Run())
+cmd/
+├── api/                      server entry point (fx.New(internal.Module).Run())
+└── migrate/                   migration CLI (up/down/version) - separate from
+                               the server on purpose, migrations never run
+                               automatically on server startup
 internal/
 ├── gateway/                  clients for external services (not implemented yet)
 ├── repository/                domain entities and data access (not implemented yet)
