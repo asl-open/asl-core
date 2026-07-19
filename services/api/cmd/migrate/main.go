@@ -1,9 +1,11 @@
-// Command migrate applies, rolls back, or inspects database migrations. It
-// is a separate binary from cmd/api on purpose - the server never migrates
-// the database on its own, migrations are a deliberate, explicit action.
+// Command migrate creates, applies, rolls back, or inspects database
+// migrations. It is a separate binary from cmd/api on purpose - the server
+// never migrates the database on its own, migrations are a deliberate,
+// explicit action.
 //
 // Run from the repository root:
 //
+//	go run ./services/api/cmd/migrate create <name>
 //	go run ./services/api/cmd/migrate up
 //	go run ./services/api/cmd/migrate down
 //	go run ./services/api/cmd/migrate version
@@ -13,6 +15,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/asl-open/asl-core/pkg/config"
 	"github.com/asl-open/asl-core/pkg/migration"
@@ -20,12 +23,31 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatal("usage: migrate <up|down|version>")
+		log.Fatal("usage: migrate <create|up|down|version>")
 	}
 
 	cfg, err := config.New()
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
+	}
+
+	cmd := os.Args[1]
+
+	// create only touches the filesystem - it doesn't need a database
+	// connection, unlike everything else below.
+	if cmd == "create" {
+		if len(os.Args) < 3 {
+			log.Fatal("usage: migrate create <name>")
+		}
+
+		dir := strings.TrimPrefix(cfg.GetString("migration.source"), "file://")
+		up, down, err := migration.Create(dir, os.Args[2])
+		if err != nil {
+			log.Fatalf("failed to create migration: %v", err)
+		}
+
+		fmt.Printf("created %s\ncreated %s\n", up, down)
+		return
 	}
 
 	// Errors below deliberately never include the DSN - it may contain
@@ -35,7 +57,7 @@ func main() {
 		log.Fatalf("failed to initialize migrate: %v", err)
 	}
 
-	switch cmd := os.Args[1]; cmd {
+	switch cmd {
 	case "up":
 		err = migration.Up(m)
 	case "down":
@@ -48,12 +70,12 @@ func main() {
 		fmt.Printf("version %d, dirty=%v\n", version, dirty)
 		return
 	default:
-		log.Fatalf("unknown command %q (expected up, down or version)", cmd)
+		log.Fatalf("unknown command %q (expected create, up, down or version)", cmd)
 	}
 
 	if err != nil {
-		log.Fatalf("migration %s failed: %v", os.Args[1], err)
+		log.Fatalf("migration %s failed: %v", cmd, err)
 	}
 
-	fmt.Printf("migration %s completed\n", os.Args[1])
+	fmt.Printf("migration %s completed\n", cmd)
 }

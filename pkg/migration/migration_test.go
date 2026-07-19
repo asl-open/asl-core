@@ -2,6 +2,7 @@ package migration_test
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -46,4 +47,34 @@ func TestUpDown(t *testing.T) {
 
 	require.NoError(t, migration.Down(m))
 	require.NoError(t, migration.Down(m), "rolling back again should be a no-op, not an error")
+}
+
+func TestCreate(t *testing.T) {
+	t.Run("first migration in an empty directory", func(t *testing.T) {
+		dir := t.TempDir()
+
+		up, down, err := migration.Create(dir, "init")
+		require.NoError(t, err)
+		require.Equal(t, filepath.Join(dir, "000001_init.up.sql"), up)
+		require.Equal(t, filepath.Join(dir, "000001_init.down.sql"), down)
+		require.FileExists(t, up)
+		require.FileExists(t, down)
+	})
+
+	t.Run("continues an existing sequence", func(t *testing.T) {
+		dir := t.TempDir()
+
+		_, _, err := migration.Create(dir, "first")
+		require.NoError(t, err)
+
+		up, down, err := migration.Create(dir, "second")
+		require.NoError(t, err)
+		require.Equal(t, filepath.Join(dir, "000002_second.up.sql"), up)
+		require.Equal(t, filepath.Join(dir, "000002_second.down.sql"), down)
+	})
+
+	t.Run("unwritable directory", func(t *testing.T) {
+		_, _, err := migration.Create(filepath.Join(t.TempDir(), "does-not-exist"), "init")
+		require.Error(t, err)
+	})
 }
