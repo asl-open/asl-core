@@ -3,11 +3,9 @@
 # Build from the repository root:
 #   docker build -f services/api/Dockerfile -t asl-core-api .
 
-FROM golang:1.25.5-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
-WORKDIR /src
-
-ENV CGO_ENABLED=0 GOTOOLCHAIN=local
+WORKDIR /app
 
 COPY go.mod go.sum ./
 RUN --mount=type=cache,target=/go/pkg/mod \
@@ -16,20 +14,18 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 COPY pkg ./pkg
 COPY services/api ./services/api
 
-ARG TARGETOS
-ARG TARGETARCH
-
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    GOOS=$TARGETOS GOARCH=$TARGETARCH \
-    go build -trimpath -ldflags="-s -w" -o /out/api ./services/api/cmd
+    GOOS=linux GOARCH=amd64 go build -o /out/api ./services/api/cmd
 
-FROM gcr.io/distroless/static-debian12:nonroot
+FROM alpine:3.19
 
-COPY --from=builder /out/api /api
+RUN addgroup -S app && adduser -S app -G app
 
-USER nonroot:nonroot
+COPY --from=builder /out/api /usr/local/bin/api
+
+USER app
 
 EXPOSE 8080
 
-ENTRYPOINT ["/api"]
+ENTRYPOINT ["/usr/local/bin/api"]
