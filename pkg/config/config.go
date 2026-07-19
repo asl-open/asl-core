@@ -27,6 +27,8 @@ func New() (Config, error) {
 	v.SetDefault("http.addr", ":8080")
 	v.SetDefault("logger.level", "info")
 	v.SetDefault("logger.format", "console")
+	v.SetDefault("database.max_open_conns", 10)
+	v.SetDefault("database.max_conn_lifetime", "1h")
 
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()

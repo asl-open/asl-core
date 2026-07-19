@@ -5,6 +5,7 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/asl-open/asl-core/pkg/config"
+	"github.com/asl-open/asl-core/pkg/database"
 	"github.com/asl-open/asl-core/pkg/logger"
 	apihttp "github.com/asl-open/asl-core/services/api/internal/http"
 )
@@ -13,5 +14,6 @@ import (
 var Module = fx.Module("api",
 	config.Module,
 	logger.Module,
+	database.Module,
 	apihttp.Module,
 )
