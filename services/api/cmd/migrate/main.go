@@ -10,16 +10,12 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
-
 	"github.com/asl-open/asl-core/pkg/config"
+	"github.com/asl-open/asl-core/pkg/migration"
 )
 
 func main() {
@@ -34,16 +30,16 @@ func main() {
 
 	// Errors below deliberately never include the DSN - it may contain
 	// credentials.
-	m, err := migrate.New(cfg.GetString("migration.source"), cfg.GetString("database.dsn"))
+	m, err := migration.New(cfg.GetString("migration.source"), cfg.GetString("database.dsn"))
 	if err != nil {
 		log.Fatalf("failed to initialize migrate: %v", err)
 	}
 
 	switch cmd := os.Args[1]; cmd {
 	case "up":
-		err = m.Up()
+		err = migration.Up(m)
 	case "down":
-		err = m.Down()
+		err = migration.Down(m)
 	case "version":
 		version, dirty, verr := m.Version()
 		if verr != nil {
@@ -55,7 +51,7 @@ func main() {
 		log.Fatalf("unknown command %q (expected up, down or version)", cmd)
 	}
 
-	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
+	if err != nil {
 		log.Fatalf("migration %s failed: %v", os.Args[1], err)
 	}
 
