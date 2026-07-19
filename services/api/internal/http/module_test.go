@@ -10,7 +10,7 @@ import (
 	"github.com/asl-open/asl-core/pkg/config"
 	"github.com/asl-open/asl-core/pkg/logger"
 	apihttp "github.com/asl-open/asl-core/services/api/internal/http"
-	"github.com/asl-open/asl-core/services/api/internal/http/handlers/ping"
+	"github.com/asl-open/asl-core/services/api/internal/http/handlers/health"
 	"github.com/asl-open/asl-core/services/api/internal/http/middleware"
 )
 
@@ -32,10 +32,10 @@ func TestNew(t *testing.T) {
 		lifecycle := fxtest.NewLifecycle(t)
 
 		err = apihttp.New(apihttp.Params{
-			Lifecycle:   lifecycle,
-			Config:      cfg,
-			Middleware:  newTestMiddleware(),
-			PingHandler: ping.NewMockHandler(),
+			Lifecycle:     lifecycle,
+			Config:        cfg,
+			Middleware:    newTestMiddleware(),
+			HealthHandler: health.NewMockHandler(),
 		})
 		require.NoError(t, err)
 
@@ -49,14 +49,13 @@ func TestNew(t *testing.T) {
 		cfg, err := config.New()
 		require.NoError(t, err)
 
-		pingHandler := ping.NewMockHandler()
 		lifecycle := fxtest.NewLifecycle(t)
 
 		err = apihttp.New(apihttp.Params{
-			Lifecycle:   lifecycle,
-			Config:      cfg,
-			Middleware:  newTestMiddleware(),
-			PingHandler: pingHandler,
+			Lifecycle:     lifecycle,
+			Config:        cfg,
+			Middleware:    newTestMiddleware(),
+			HealthHandler: health.NewMockHandler(),
 		})
 		require.NoError(t, err)
 

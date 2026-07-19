@@ -8,6 +8,7 @@ import (
 	"github.com/asl-open/asl-core/pkg/database"
 	"github.com/asl-open/asl-core/pkg/logger"
 	apihttp "github.com/asl-open/asl-core/services/api/internal/http"
+	"github.com/asl-open/asl-core/services/api/internal/services"
 )
 
 // Module aggregates all Fx modules for the api service.
@@ -15,5 +16,6 @@ var Module = fx.Module("api",
 	config.Module,
 	logger.Module,
 	database.Module,
+	services.Module,
 	apihttp.Module,
 )
