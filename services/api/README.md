@@ -24,6 +24,22 @@ Run migrations first (see [`../../migrations/README.md`](../../migrations/README
 make migrate-up
 ```
 
+### Docker
+
+Build from the repository root (the image needs `pkg/` too, not just this
+service):
+
+```
+docker build -f services/api/Dockerfile -t asl-core-api .
+docker run --rm -e DATABASE_DSN=... -e HTTP_ADDR=:8080 -p 8080:8080 asl-core-api
+```
+
+Multi-stage build (`golang:1.25-alpine` builder, `alpine:3.19` runtime) -
+no Go toolchain in the final image, runs as the unprivileged `app` user
+(~33MB total). The server is PID 1 and exits on `SIGTERM` (what
+`docker stop` sends), so shutdown is graceful the same way it is outside
+a container.
+
 ## Endpoints
 
 - `GET /health` — always `200 {"status":"ok"}` while the process is

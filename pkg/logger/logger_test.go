@@ -2,6 +2,9 @@ package logger
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"syscall"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -27,6 +30,22 @@ func TestNew(t *testing.T) {
 	log.Debug(ctx, "test logger debug message")
 	log.Warn(ctx, "test logger warn message")
 	log.Error(ctx, "test logger error message")
+}
+
+func Test_isIgnorableSyncError(t *testing.T) {
+	t.Run("EINVAL wrapped like os.Sync on a pipe/character device", func(t *testing.T) {
+		err := &os.PathError{Op: "sync", Path: "/dev/stdout", Err: syscall.EINVAL}
+		require.True(t, isIgnorableSyncError(err))
+	})
+
+	t.Run("ENOTTY", func(t *testing.T) {
+		err := &os.PathError{Op: "sync", Path: "/dev/stdout", Err: syscall.ENOTTY}
+		require.True(t, isIgnorableSyncError(err))
+	})
+
+	t.Run("other errors are not ignored", func(t *testing.T) {
+		require.False(t, isIgnorableSyncError(fmt.Errorf("disk full")))
+	})
 }
 
 func Test_getLevel(t *testing.T) {
