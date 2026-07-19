@@ -3,8 +3,10 @@ package logger
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
+	"syscall"
 
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -58,7 +60,7 @@ func New(p Params) (Logger, error) {
 	p.Append(
 		fx.Hook{
 			OnStop: func(ctx context.Context) error {
-				if err := log.Sync(); err != nil {
+				if err := log.Sync(); err != nil && !isIgnorableSyncError(err) {
 					return fmt.Errorf("failed to sync logger: %w", err)
 				}
 				return nil
@@ -83,6 +85,15 @@ func (l *logger) Warn(ctx context.Context, msg string, fields ...interface{}) {
 
 func (l *logger) Error(ctx context.Context, msg string, fields ...interface{}) {
 	l.lg.Errorw(msg, fields...)
+}
+
+// isIgnorableSyncError reports whether err is one of the well-known cases
+// where Sync() on stdout/stderr fails even though nothing is actually
+// wrong - e.g. inside a container, stdout is a pipe/character device, and
+// fsync on it returns EINVAL or ENOTTY. Observed as "sync /dev/stdout:
+// invalid argument" when running under Docker.
+func isIgnorableSyncError(err error) bool {
+	return errors.Is(err, syscall.EINVAL) || errors.Is(err, syscall.ENOTTY)
 }
 
 func getLevel(config config.Config) zapcore.Level {
