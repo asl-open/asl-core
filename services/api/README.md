@@ -6,7 +6,7 @@ foundation/bootstrap work (Fx wiring, HTTP transport, configuration).
 ## Running
 
 ```
-go run ./cmd/api
+go run ./cmd
 ```
 
 Configuration is loaded from environment variables (see
@@ -15,7 +15,7 @@ Configuration is loaded from environment variables (see
 `DATABASE_DSN` is required (PostgreSQL connection string):
 
 ```
-DATABASE_DSN=postgres://postgres:postgres@localhost:5432/asl_core?sslmode=disable go run ./cmd/api
+DATABASE_DSN=postgres://postgres:postgres@localhost:5432/asl_core?sslmode=disable go run ./cmd
 ```
 
 Run migrations first (see [`../../migrations/README.md`](../../migrations/README.md)):
@@ -27,8 +27,7 @@ make migrate-up
 ## Layout
 
 ```
-cmd/
-└── api/                      server entry point (fx.New(internal.Module).Run())
+cmd/                         server entry point (fx.New(internal.Module).Run())
 internal/
 ├── gateway/                  clients for external services (not implemented yet)
 ├── repository/                domain entities and data access (not implemented yet)
@@ -66,7 +65,7 @@ bad `DATABASE_DSN` or an unreachable database fails startup immediately.
   `routes.go`.
 - **Fx modules**: every package that needs to be wired into the app exposes
   its own `Module` (`fx.Provide`/`fx.Options`/`fx.Module`), aggregated one
-  level up. `cmd/api/main.go` only ever calls `fx.New(internal.Module).Run()`.
+  level up. `cmd/main.go` only ever calls `fx.New(internal.Module).Run()`.
 - **Config**: typed via `pkg/config` (env vars only, no config file). See
   that package for how to add a new setting.
 - **Shared infra lives in `pkg/`, not `internal/`**: `pkg/config`, `pkg/logger`
