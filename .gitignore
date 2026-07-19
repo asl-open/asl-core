@@ -1,0 +1,59 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+bin/
+build/
+dist/
+tmp/
+
+# Coverage
+coverage.*
+*.coverprofile
+profile.cov
+
+# Dependencies
+vendor/
+
+# Go workspace
+go.work
+go.work.sum
+
+# Environment and local config
+.env
+.env.*
+!.env.example
+
+configs/*.local.yaml
+configs/*.local.yml
+
+# Logs
+*.log
+logs/
+
+# Local data
+data/
+storage/
+uploads/
+postgres-data/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker overrides
+docker-compose.override.yml
+docker-compose.override.yaml
