@@ -3,8 +3,8 @@
 #
 # Enabled linters and why:
 #   errcheck    - unchecked error return values
-#   govet       - the standard `go vet` suite, plus fieldalignment
-#                 (flags structs that could shrink by reordering fields)
+#   govet       - the standard `go vet` suite (fieldalignment runs
+#                 separately - see `make fieldalignment` in the Makefile)
 #   staticcheck - bugs, deprecated API usage, simplifications (the
 #                 former staticcheck/gosimple/stylecheck bundle)
 #   unused      - unused constants, variables, functions, types
@@ -62,9 +62,6 @@ linters:
     - wastedassign
     - whitespace
   settings:
-    govet:
-      enable:
-        - fieldalignment
     errcheck:
       check-type-assertions: true
     gocritic:
