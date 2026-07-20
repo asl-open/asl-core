@@ -4,6 +4,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -53,6 +54,9 @@ func New(p Params) (Conn, error) {
 	}
 
 	if n := p.Config.GetInt("database.max_open_conns"); n > 0 {
+		if n > math.MaxInt32 {
+			return nil, fmt.Errorf("database.max_open_conns %d exceeds maximum of %d", n, math.MaxInt32)
+		}
 		poolConfig.MaxConns = int32(n)
 	}
 

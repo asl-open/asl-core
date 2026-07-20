@@ -20,9 +20,12 @@ func newTestMiddleware() middleware.Middleware {
 
 func TestNew(t *testing.T) {
 	t.Run("err on listen", func(t *testing.T) {
-		listener, err := net.Listen("tcp", ":0")
+		var lc net.ListenConfig
+		listener, err := lc.Listen(t.Context(), "tcp", ":0")
 		require.NoError(t, err)
-		defer listener.Close()
+		defer func() {
+			_ = listener.Close()
+		}()
 
 		t.Setenv("HTTP_ADDR", listener.Addr().String())
 

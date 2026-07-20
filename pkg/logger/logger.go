@@ -96,8 +96,8 @@ func isIgnorableSyncError(err error) bool {
 	return errors.Is(err, syscall.EINVAL) || errors.Is(err, syscall.ENOTTY)
 }
 
-func getLevel(config config.Config) zapcore.Level {
-	switch config.GetString("logger.level") {
+func getLevel(cfg config.Config) zapcore.Level {
+	switch cfg.GetString("logger.level") {
 	case "debug":
 		return zapcore.DebugLevel
 	case "info":

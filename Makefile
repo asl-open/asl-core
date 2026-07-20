@@ -6,11 +6,13 @@
 MIGRATE_BIN := $(HOME)/go/bin/migrate
 MIGRATIONS_DIR := migrations/api
 GOLANGCI_LINT_BIN := $(HOME)/go/bin/golangci-lint
+FIELDALIGNMENT_BIN := $(HOME)/go/bin/fieldalignment
 API_CMD := ./services/api/cmd
 BUILD_OUT := bin/api
 
-.PHONY: help run build test fmt setup-lint lint setup-migrate migrate-create \
-	migrate-up migrate-down migrate-version docker-up docker-down docker-logs
+.PHONY: help run build test fmt setup-lint lint setup-fieldalignment fieldalignment \
+	fieldalignment-fix setup-migrate migrate-create migrate-up migrate-down \
+	migrate-version docker-up docker-down docker-logs
 
 ## help: show this help
 help:
@@ -41,6 +43,20 @@ fmt: setup-lint
 ## lint: run the configured linters
 lint: setup-lint
 	$(GOLANGCI_LINT_BIN) run ./...
+
+setup-fieldalignment:
+	@if [ ! -x "$(FIELDALIGNMENT_BIN)" ]; then \
+		echo "Installing fieldalignment CLI..."; \
+		go install golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment@latest; \
+	fi
+
+## fieldalignment: report structs that could shrink by reordering fields
+fieldalignment: setup-fieldalignment
+	$(FIELDALIGNMENT_BIN) ./...
+
+## fieldalignment-fix: rewrite structs in place to minimize padding
+fieldalignment-fix: setup-fieldalignment
+	$(FIELDALIGNMENT_BIN) -fix ./...
 
 setup-migrate:
 	@if [ ! -x "$(MIGRATE_BIN)" ]; then \

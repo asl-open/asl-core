@@ -1,3 +1,36 @@
+# golangci-lint v2 config. Run `make lint` (installs the CLI on demand)
+# or `golangci-lint run ./...` directly.
+#
+# Enabled linters and why:
+#   errcheck    - unchecked error return values
+#   govet       - the standard `go vet` suite (fieldalignment runs
+#                 separately - see `make fieldalignment` in the Makefile)
+#   staticcheck - bugs, deprecated API usage, simplifications (the
+#                 former staticcheck/gosimple/stylecheck bundle)
+#   unused      - unused constants, variables, functions, types
+#   ineffassign - assignments whose value is never used
+#   bodyclose   - unclosed net/http response bodies
+#   copyloopvar - stale loop-variable capture
+#   durationcheck - two time.Duration values multiplied together
+#   errname     - sentinel errors named Err*, error types named *Error
+#   errorlint   - error wrapping/comparison mistakes (errors.Is/As, %w)
+#   exptostd    - golang.org/x/exp usage that the stdlib now covers
+#   gosec       - common security mistakes
+#   gocritic    - diagnostic/performance/style checks (import shadowing,
+#                 needless allocations, etc.)
+#   intrange    - for-loops that could use Go 1.22+ range-over-int
+#   misspell    - commonly misspelled English words
+#   nilerr      - `if err != nil { return nil }` mistakes
+#   nilnil      - simultaneous nil error + nil value return
+#   noctx       - HTTP/network calls made without a context.Context
+#   revive      - golint replacement; see the curated rule list below
+#   rowserrcheck - unchecked sql.Rows.Err()
+#   sqlclosecheck - unclosed sql.Rows/sql.Stmt/pgx.Rows
+#   unconvert   - unnecessary type conversions
+#   unparam     - unused function parameters
+#   usestdlibvars - literals that duplicate an existing stdlib constant
+#   wastedassign - assignments immediately overwritten
+#   whitespace  - unnecessary leading/trailing blank lines
 version: "2"
 linters:
   default: none
@@ -20,6 +53,7 @@ linters:
     - nilerr
     - nilnil
     - noctx
+    - revive
     - rowserrcheck
     - sqlclosecheck
     - unconvert
@@ -35,8 +69,46 @@ linters:
         - diagnostic
         - performance
         - style
+    revive:
+      # Explicit allowlist (revive's own default rule set, each rule
+      # listed so exclusions are visible instead of implicit). "exported"
+      # and "package-comments" are disabled: this codebase deliberately
+      # skips doc comments on exported identifiers (see any handler or
+      # mock package) and enforcing them here would fight that
+      # convention, not catch a bug. "unused-parameter" is disabled
+      # because several interface implementations (e.g. Logger's ctx
+      # parameters, fx lifecycle hooks) intentionally keep an unused
+      # parameter to satisfy a signature or reserve it for later use.
+      rules:
+        - name: blank-imports
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: dot-imports
+        - name: error-return
+        - name: error-strings
+        - name: error-naming
+        - name: exported
+          disabled: true
+        - name: if-return
+        - name: increment-decrement
+        - name: var-naming
+        - name: var-declaration
+        - name: package-comments
+          disabled: true
+        - name: range
+        - name: receiver-naming
+        - name: redefines-builtin-id
+        - name: superfluous-else
+        - name: indent-error-flow
+        - name: unreachable-code
+        - name: unused-parameter
+          disabled: true
   exclusions:
+    generated: lax
     rules:
+      # gosec's checks (hardcoded creds, weak randomness, etc.) and
+      # unparam's "always the same argument" check aren't meaningful in
+      # test code, which intentionally uses fixed inputs and mocks.
       - path: _test\.go
         linters:
           - gosec

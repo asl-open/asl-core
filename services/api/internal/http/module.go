@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
@@ -40,14 +41,16 @@ func New(p Params) error {
 	registerRoutes(engine, p)
 
 	server := &http.Server{
-		Handler: engine,
+		Handler:           engine,
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	p.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			addr := p.Config.GetString("http.addr")
 
-			listener, err := net.Listen("tcp", addr)
+			var lc net.ListenConfig
+			listener, err := lc.Listen(ctx, "tcp", addr)
 			if err != nil {
 				return fmt.Errorf("failed to listen on %s: %w", addr, err)
 			}
