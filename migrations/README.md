@@ -31,5 +31,5 @@ make migrate-version                      # show the current version
 The Makefile installs the `migrate` CLI itself the first time it's needed
 (`go install ... github.com/golang-migrate/migrate/v4/cmd/migrate`) - no
 manual setup required. These targets currently only cover the `api`
-service; the rest of the Makefile (run/build/test/lint/docker) lands with
-#13.
+service. Run `make help` from the repository root for the full list of
+available targets (run/build/test/lint/fmt/docker).

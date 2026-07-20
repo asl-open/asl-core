@@ -1,10 +1,46 @@
-# Only migration targets exist for now - run/build/test/lint/docker
-# targets land with the full Makefile (#13).
+# Development commands for the ASL Core monorepo. Run `make help` for a
+# list of available targets.
+
+.DEFAULT_GOAL := help
 
 MIGRATE_BIN := $(HOME)/go/bin/migrate
 MIGRATIONS_DIR := migrations/api
+GOLANGCI_LINT_BIN := $(HOME)/go/bin/golangci-lint
+API_CMD := ./services/api/cmd
+BUILD_OUT := bin/api
 
-.PHONY: setup-migrate migrate-create migrate-up migrate-down migrate-version
+.PHONY: help run build test fmt setup-lint lint setup-migrate migrate-create \
+	migrate-up migrate-down migrate-version docker-up docker-down docker-logs
+
+## help: show this help
+help:
+	@grep -E '^## ' $(MAKEFILE_LIST) | sed 's/^## /make /' | sort
+
+## run: run the api service locally. Requires DATABASE_DSN (see services/api/.env.example)
+run:
+	go run $(API_CMD)
+
+## build: build the api service binary to bin/api
+build:
+	go build -o $(BUILD_OUT) $(API_CMD)
+
+## test: run all tests
+test:
+	go test ./...
+
+setup-lint:
+	@if [ ! -x "$(GOLANGCI_LINT_BIN)" ]; then \
+		echo "Installing golangci-lint CLI..."; \
+		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest; \
+	fi
+
+## fmt: format all Go source files
+fmt: setup-lint
+	$(GOLANGCI_LINT_BIN) fmt ./...
+
+## lint: run the configured linters
+lint: setup-lint
+	$(GOLANGCI_LINT_BIN) run ./...
 
 setup-migrate:
 	@if [ ! -x "$(MIGRATE_BIN)" ]; then \
@@ -28,3 +64,15 @@ migrate-down: setup-migrate
 ## migrate-version: show the current migration version. Requires DATABASE_DSN.
 migrate-version: setup-migrate
 	$(MIGRATE_BIN) -path $(MIGRATIONS_DIR) -database "$(DATABASE_DSN)" version
+
+## docker-up: start the local stack (Postgres + api) with Docker Compose
+docker-up:
+	docker compose up -d --build
+
+## docker-down: stop the local Docker Compose stack
+docker-down:
+	docker compose down
+
+## docker-logs: tail logs from the Docker Compose stack
+docker-logs:
+	docker compose logs -f
