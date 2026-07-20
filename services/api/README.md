@@ -95,7 +95,8 @@ internal/
 │   │                            registers Fx lifecycle hooks (listen on OnStart,
 │   │                            graceful shutdown on OnStop)
 │   ├── routes.go                 the single place listing every route -> handler mapping
-│   ├── docs/                      OpenAPI spec (not added yet)
+│   ├── docs/                      generated OpenAPI spec (swagger.yaml) -
+│   │                              see docs/api.md at the repo root
 │   ├── middleware/                 middleware.Middleware: Logging() logs each
 │   │                              completed request (recovery uses gin.Recovery())
 │   └── handlers/

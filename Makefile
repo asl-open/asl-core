@@ -8,12 +8,19 @@ MIGRATIONS_DIR := migrations/api
 GOLANGCI_LINT_BIN := $(HOME)/go/bin/golangci-lint
 FIELDALIGNMENT_BIN := $(HOME)/go/bin/fieldalignment
 MODERNIZE_BIN := $(HOME)/go/bin/modernize
+SWAG_BIN := $(HOME)/go/bin/swag
+VACUUM_BIN := $(HOME)/go/bin/vacuum
 API_CMD := ./services/api/cmd
 BUILD_OUT := bin/api
+OPENAPI_DIR := services/api/internal/http/docs
+OPENAPI_SPEC := $(OPENAPI_DIR)/swagger.yaml
+SWAG_GENERAL := main.go
+SWAG_DIRS := services/api/cmd,services/api/internal/http/handlers/health
 
 .PHONY: help run build test test-race fmt fmt-check setup-lint lint setup-fieldalignment \
 	fieldalignment fieldalignment-fix go-fix go-fix-check setup-modernize modernize \
-	modernize-fix setup-migrate migrate-create migrate-up migrate-down migrate-version \
+	modernize-fix setup-swag openapi openapi-check setup-vacuum openapi-validate \
+	setup-migrate migrate-create migrate-up migrate-down migrate-version \
 	docker-up docker-down docker-logs
 
 ## help: show this help
@@ -89,6 +96,39 @@ modernize: setup-modernize
 ## modernize-fix: rewrite code in place to use newer Go language/library features
 modernize-fix: setup-modernize
 	$(MODERNIZE_BIN) -fix ./...
+
+setup-swag:
+	@if [ ! -x "$(SWAG_BIN)" ]; then \
+		echo "Installing swag CLI..."; \
+		go install github.com/swaggo/swag/v2/cmd/swag@latest; \
+	fi
+
+## openapi: regenerate the OpenAPI spec from swag annotations
+openapi: setup-swag
+	$(SWAG_BIN) init -g $(SWAG_GENERAL) -d $(SWAG_DIRS) -o $(OPENAPI_DIR) --ot yaml --v3.1 --parseInternal
+
+## openapi-check: fail if the generated OpenAPI spec is out of date, without changing tracked files
+openapi-check: setup-swag
+	@tmp=$$(mktemp -d); \
+	$(SWAG_BIN) init -g $(SWAG_GENERAL) -d $(SWAG_DIRS) -o $$tmp --ot yaml --v3.1 --parseInternal > /dev/null 2>&1; \
+	if diff -u $(OPENAPI_SPEC) $$tmp/swagger.yaml; then \
+		echo "OpenAPI spec is up to date"; \
+		rm -rf $$tmp; \
+	else \
+		echo "OpenAPI spec is out of date - run 'make openapi' to regenerate"; \
+		rm -rf $$tmp; \
+		exit 1; \
+	fi
+
+setup-vacuum:
+	@if [ ! -x "$(VACUUM_BIN)" ]; then \
+		echo "Installing vacuum CLI..."; \
+		go install github.com/daveshanley/vacuum@latest; \
+	fi
+
+## openapi-validate: validate the OpenAPI spec
+openapi-validate: setup-vacuum
+	$(VACUUM_BIN) lint $(OPENAPI_SPEC)
 
 setup-migrate:
 	@if [ ! -x "$(MIGRATE_BIN)" ]; then \
