@@ -11,10 +11,10 @@ MODERNIZE_BIN := $(HOME)/go/bin/modernize
 API_CMD := ./services/api/cmd
 BUILD_OUT := bin/api
 
-.PHONY: help run build test fmt fmt-check setup-lint lint setup-fieldalignment fieldalignment \
-	fieldalignment-fix go-fix go-fix-check setup-modernize modernize modernize-fix \
-	setup-migrate migrate-create migrate-up migrate-down migrate-version docker-up \
-	docker-down docker-logs
+.PHONY: help run build test test-race fmt fmt-check setup-lint lint setup-fieldalignment \
+	fieldalignment fieldalignment-fix go-fix go-fix-check setup-modernize modernize \
+	modernize-fix setup-migrate migrate-create migrate-up migrate-down migrate-version \
+	docker-up docker-down docker-logs
 
 ## help: show this help
 help:
@@ -31,6 +31,10 @@ build:
 ## test: run all tests
 test:
 	go test ./...
+
+## test-race: run all tests with the race detector enabled
+test-race:
+	go test -race ./...
 
 setup-lint:
 	@if [ ! -x "$(GOLANGCI_LINT_BIN)" ]; then \

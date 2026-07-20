@@ -10,8 +10,9 @@ go run ./cmd
 ```
 
 or, from the repository root, `make run` (`make build` builds a binary
-to `bin/api`, `make test` runs the test suite - see `make help` for the
-full list of targets).
+to `bin/api`, `make test` runs the test suite, `make test-race` runs it
+with the race detector - see `make help` for the full list of targets,
+and [`docs/testing.md`](../../docs/testing.md) for testing conventions).
 
 Configuration is loaded from environment variables (see
 [`.env.example`](.env.example)). `HTTP_ADDR` overrides the listen address
