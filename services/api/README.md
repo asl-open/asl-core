@@ -78,6 +78,10 @@ named volume.
   database) are reachable, `503 {"status":"unavailable"}` otherwise.
   Dependency checks have a 2s timeout. The underlying error is logged
   server-side, never returned to the client.
+- `GET /openapi.yaml` — the generated OpenAPI spec (see
+  [`../../docs/api.md`](../../docs/api.md)).
+- `GET /docs` — a RapiDoc page rendering the spec, for browsing the API
+  locally.
 
 ## Layout
 
@@ -95,7 +99,8 @@ internal/
 │   │                            registers Fx lifecycle hooks (listen on OnStart,
 │   │                            graceful shutdown on OnStop)
 │   ├── routes.go                 the single place listing every route -> handler mapping
-│   ├── docs/                      OpenAPI spec (not added yet)
+│   ├── docs/                      generated OpenAPI spec (swagger.yaml) -
+│   │                              see docs/api.md at the repo root
 │   ├── middleware/                 middleware.Middleware: Logging() logs each
 │   │                              completed request (recovery uses gin.Recovery())
 │   └── handlers/
