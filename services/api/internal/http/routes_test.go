@@ -30,7 +30,7 @@ func newTestEngine(checker *servicehealth.MockChecker) *gin.Engine {
 func TestRegisterRoutes_Health(t *testing.T) {
 	engine := newTestEngine(&servicehealth.MockChecker{})
 
-	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/health", http.NoBody)
 	rec := httptest.NewRecorder()
 	engine.ServeHTTP(rec, req)
 
@@ -45,7 +45,7 @@ func TestRegisterRoutes_Ready(t *testing.T) {
 
 		engine := newTestEngine(checker)
 
-		req := httptest.NewRequest(http.MethodGet, "/ready", nil)
+		req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/ready", http.NoBody)
 		rec := httptest.NewRecorder()
 		engine.ServeHTTP(rec, req)
 
@@ -59,7 +59,7 @@ func TestRegisterRoutes_Ready(t *testing.T) {
 
 		engine := newTestEngine(checker)
 
-		req := httptest.NewRequest(http.MethodGet, "/ready", nil)
+		req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/ready", http.NoBody)
 		rec := httptest.NewRecorder()
 		engine.ServeHTTP(rec, req)
 
@@ -79,7 +79,7 @@ func TestRecoveryMiddleware(t *testing.T) {
 		panic("boom")
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "/panic", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/panic", http.NoBody)
 	rec := httptest.NewRecorder()
 
 	engine.ServeHTTP(rec, req)
