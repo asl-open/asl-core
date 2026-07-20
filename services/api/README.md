@@ -9,6 +9,10 @@ foundation/bootstrap work (Fx wiring, HTTP transport, configuration).
 go run ./cmd
 ```
 
+or, from the repository root, `make run` (`make build` builds a binary
+to `bin/api`, `make test` runs the test suite - see `make help` for the
+full list of targets).
+
 Configuration is loaded from environment variables (see
 [`.env.example`](.env.example)). `HTTP_ADDR` overrides the listen address
 (defaults to `:8080`), `LOGGER_LEVEL`/`LOGGER_FORMAT` control logging,
@@ -50,9 +54,10 @@ variables preconfigured:
 docker compose up -d --build
 ```
 
-The API is reachable at `localhost:8080`, PostgreSQL at `localhost:5432`
-(data persists in the `postgres-data` named volume). If either port is
-already taken on your machine, override it instead of editing the file:
+or `make docker-up` (`make docker-down` / `make docker-logs`). The API
+is reachable at `localhost:8080`, PostgreSQL at `localhost:5432` (data
+persists in the `postgres-data` named volume). If either port is already
+taken on your machine, override it instead of editing the file:
 
 ```
 API_PORT=8090 POSTGRES_PORT=5435 docker compose up -d --build
@@ -60,8 +65,9 @@ API_PORT=8090 POSTGRES_PORT=5435 docker compose up -d --build
 
 Run migrations against the compose database with
 `DATABASE_DSN=postgres://postgres:postgres@localhost:5432/asl_core?sslmode=disable make migrate-up`
-(adjust the port if overridden). `docker compose down` stops everything
-cleanly; add `-v` to also drop the named volume.
+(adjust the port if overridden). `docker compose down` (or
+`make docker-down`) stops everything cleanly; add `-v` to also drop the
+named volume.
 
 ## Endpoints
 
