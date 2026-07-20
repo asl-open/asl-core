@@ -34,11 +34,34 @@ docker build -f services/api/Dockerfile -t asl-core-api .
 docker run --rm -e DATABASE_DSN=... -e HTTP_ADDR=:8080 -p 8080:8080 asl-core-api
 ```
 
-Multi-stage build (`golang:1.25-alpine` builder, `alpine:3.19` runtime) -
+Multi-stage build (`golang:1.26-alpine` builder, `alpine:3.19` runtime) -
 no Go toolchain in the final image, runs as the unprivileged `app` user
 (~33MB total). The server is PID 1 and exits on `SIGTERM` (what
 `docker stop` sends), so shutdown is graceful the same way it is outside
 a container.
+
+### Docker Compose
+
+For local development, `docker-compose.yml` at the repository root runs
+this service alongside PostgreSQL, with networking and environment
+variables preconfigured:
+
+```
+docker compose up -d --build
+```
+
+The API is reachable at `localhost:8080`, PostgreSQL at `localhost:5432`
+(data persists in the `postgres-data` named volume). If either port is
+already taken on your machine, override it instead of editing the file:
+
+```
+API_PORT=8090 POSTGRES_PORT=5435 docker compose up -d --build
+```
+
+Run migrations against the compose database with
+`DATABASE_DSN=postgres://postgres:postgres@localhost:5432/asl_core?sslmode=disable make migrate-up`
+(adjust the port if overridden). `docker compose down` stops everything
+cleanly; add `-v` to also drop the named volume.
 
 ## Endpoints
 
