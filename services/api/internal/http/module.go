@@ -36,11 +36,16 @@ type Params struct {
 	HealthHandler health.Handler
 }
 
+// New's Params is taken by value, not pointer, because it embeds fx.In -
+// dig (Fx's DI container) rejects a pointer to an In struct at wire time
+// ("cannot depend on a pointer to a parameter object, use a value instead").
+//
+//nolint:gocritic // fx.In structs must be received by value, see above
 func New(p Params) error {
 	engine := gin.New()
 	engine.Use(p.Middleware.RequestID(), p.Middleware.Errors(), p.Middleware.Logging())
 
-	registerRoutes(engine, p)
+	registerRoutes(engine, &p)
 
 	server := &http.Server{
 		Handler:           engine,

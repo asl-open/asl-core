@@ -26,7 +26,7 @@ func newTestEngine(checker *servicehealth.MockChecker) *gin.Engine {
 	engine.Use(mw.Errors())
 
 	h := health.New(health.Params{Checker: checker, Logger: &logger.MockLogger{}})
-	registerRoutes(engine, Params{HealthHandler: h})
+	registerRoutes(engine, &Params{HealthHandler: h})
 
 	return engine
 }

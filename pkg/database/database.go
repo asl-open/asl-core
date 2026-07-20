@@ -90,12 +90,12 @@ func New(p Params) (Conn, error) {
 	return &conn{pool: pool}, nil
 }
 
-// shutdownHook wraps close (typically (*pgxpool.Pool).Close) into an fx
+// shutdownHook wraps closePool (typically (*pgxpool.Pool).Close) into an fx
 // OnStop hook that logs the shutdown, rather than letting the pool close
 // silently.
-func shutdownHook(log logger.Logger, close func()) func(context.Context) error {
+func shutdownHook(log logger.Logger, closePool func()) func(context.Context) error {
 	return func(ctx context.Context) error {
-		close()
+		closePool()
 		log.Info(ctx, "database connection pool closed")
 		return nil
 	}
