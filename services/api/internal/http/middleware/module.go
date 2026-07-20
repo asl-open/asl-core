@@ -17,6 +17,7 @@ type Params struct {
 
 type Middleware interface {
 	Logging() gin.HandlerFunc
+	Errors() gin.HandlerFunc
 }
 
 type middleware struct {

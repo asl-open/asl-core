@@ -12,14 +12,17 @@ import (
 
 	"github.com/asl-open/asl-core/pkg/logger"
 	"github.com/asl-open/asl-core/services/api/internal/http/handlers/health"
+	apihttpmiddleware "github.com/asl-open/asl-core/services/api/internal/http/middleware"
 	servicehealth "github.com/asl-open/asl-core/services/api/internal/services/health"
 )
 
 func newTestEngine(checker *servicehealth.MockChecker) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
+	mw := apihttpmiddleware.New(apihttpmiddleware.Params{Logger: &logger.MockLogger{}})
+
 	engine := gin.New()
-	engine.Use(gin.Recovery())
+	engine.Use(mw.Errors())
 
 	h := health.New(health.Params{Checker: checker, Logger: &logger.MockLogger{}})
 	registerRoutes(engine, Params{HealthHandler: h})
@@ -68,21 +71,4 @@ func TestRegisterRoutes_Ready(t *testing.T) {
 		require.NotContains(t, rec.Body.String(), "connection refused",
 			"must not leak internal error details to the client")
 	})
-}
-
-func TestRecoveryMiddleware(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	engine := gin.New()
-	engine.Use(gin.Recovery())
-	engine.GET("/panic", func(c *gin.Context) {
-		panic("boom")
-	})
-
-	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/panic", http.NoBody)
-	rec := httptest.NewRecorder()
-
-	engine.ServeHTTP(rec, req)
-
-	require.Equal(t, http.StatusInternalServerError, rec.Code)
 }

@@ -36,7 +36,7 @@ type Params struct {
 
 func New(p Params) error {
 	engine := gin.New()
-	engine.Use(gin.Recovery(), p.Middleware.Logging())
+	engine.Use(p.Middleware.Errors(), p.Middleware.Logging())
 
 	registerRoutes(engine, p)
 

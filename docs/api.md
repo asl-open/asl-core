@@ -38,6 +38,26 @@ Add the `@Summary`/`@Description`/`@Tags`/`@Produce`/`@Success`/
 directory isn't already covered, add it to `SWAG_DIRS` in the root
 `Makefile`.
 
+## Error responses
+
+Every HTTP error uses the same JSON envelope
+(`{"message": "...", "code": ..., "request_id": "..."}`, see
+`pkg/response.Response`). To report one from a handler:
+
+```go
+c.Error(apierrors.ErrNotFound.WithMessage("user 42 not found"))
+```
+
+`apierrors` (`services/api/internal/http/apierrors`) holds the canonical
+errors (`ErrBadRequest` -> 400, `ErrNotFound` -> 404); `.With...` returns
+a customized copy without mutating the shared value. `middleware.Errors()`
+(registered ahead of every route) turns whatever was passed to `c.Error`
+into the response, and separately recovers panics into a generic 500 -
+neither ever sends the real error text to the client for anything that
+isn't a deliberately constructed `*errorsx.AppError`. See
+`pkg/errorsx`, `pkg/response`, and
+`services/api/internal/http/middleware/errors.go` for the full mapping.
+
 ## Versioning convention
 
 Business/resource endpoints, once they exist, will be mounted under
