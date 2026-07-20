@@ -78,6 +78,10 @@ named volume.
   database) are reachable, `503 {"status":"unavailable"}` otherwise.
   Dependency checks have a 2s timeout. The underlying error is logged
   server-side, never returned to the client.
+- `GET /openapi.yaml` — the generated OpenAPI spec (see
+  [`../../docs/api.md`](../../docs/api.md)).
+- `GET /docs` — a RapiDoc page rendering the spec, for browsing the API
+  locally.
 
 ## Layout
 

@@ -16,6 +16,19 @@ make openapi-validate # lint the spec (structure, missing descriptions, etc.)
 
 The spec is OpenAPI 3.1.
 
+## Browsing it locally
+
+The running app serves the spec itself, embedded via `go:embed` (no
+filesystem dependency, works the same in the Docker image):
+
+- `GET /openapi.yaml` - the raw spec
+- `GET /docs` - a [RapiDoc](https://rapidocweb.com/) page rendering it
+  (dark theme, try-it enabled, loaded from a CDN script)
+
+`make docker-up` (or `go run ./cmd`/`make run`), then open
+`http://localhost:8080/docs` (or whatever `HTTP_ADDR`/`API_PORT` you're
+using).
+
 ## Adding a new endpoint
 
 Add the `@Summary`/`@Description`/`@Tags`/`@Produce`/`@Success`/
