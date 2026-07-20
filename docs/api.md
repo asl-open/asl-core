@@ -58,6 +58,22 @@ isn't a deliberately constructed `*errorsx.AppError`. See
 `pkg/errorsx`, `pkg/response`, and
 `services/api/internal/http/middleware/errors.go` for the full mapping.
 
+## Request IDs
+
+Every request gets one, via `middleware.RequestID()` (registered first,
+ahead of `Errors()`/`Logging()`): an existing `X-Request-Id` request
+header is preserved as-is if it looks safe (non-empty, not absurdly
+long, no control characters - not required to be a UUID, so an upstream
+system's own correlation ID passes through unchanged); otherwise a UUID
+is generated. Either way it's:
+
+- attached to the request `context.Context` (`pkg/requestid`) - from
+  there, `pkg/logger` includes it in every log line for that request
+  automatically, with no per-call-site changes needed
+- echoed back as the `X-Request-Id` response header
+- included in the `request_id` field of any error response for that
+  request
+
 ## Versioning convention
 
 Business/resource endpoints, once they exist, will be mounted under

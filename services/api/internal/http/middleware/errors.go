@@ -4,15 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/asl-open/asl-core/pkg/errorsx"
+	"github.com/asl-open/asl-core/pkg/requestid"
 	"github.com/asl-open/asl-core/pkg/response"
 	"github.com/asl-open/asl-core/services/api/internal/http/reply"
 )
-
-// requestIDKey is the gin.Context key a request-ID middleware should set
-// so error responses can include it. Nothing sets it yet - until a
-// request-ID middleware lands, requestID falls back to echoing the
-// X-Request-Id header if the client sent one.
-const requestIDKey = "request_id"
 
 // Errors recovers panics and converts any error attached via c.Error
 // during the request into the standard response.Response envelope.
@@ -44,11 +39,12 @@ func (m *middleware) Errors() gin.HandlerFunc {
 	}
 }
 
+// requestID returns the ID RequestID() attached to the request context.
+// Falls back to the raw header in case Errors() ever runs without
+// RequestID() ahead of it in the chain.
 func requestID(c *gin.Context) string {
-	if v, ok := c.Get(requestIDKey); ok {
-		if s, ok := v.(string); ok && s != "" {
-			return s
-		}
+	if id, ok := requestid.FromContext(c.Request.Context()); ok {
+		return id
 	}
-	return c.GetHeader("X-Request-Id")
+	return c.GetHeader(headerRequestID)
 }

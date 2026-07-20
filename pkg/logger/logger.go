@@ -13,13 +13,14 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	"github.com/asl-open/asl-core/pkg/config"
+	"github.com/asl-open/asl-core/pkg/requestid"
 )
 
 var Module = fx.Provide(New)
 
-// Logger's methods take ctx so per-request fields (e.g. the request ID
-// added in #20) can be attached automatically once that lands - for now ctx
-// is unused.
+// Logger's methods take ctx so the request ID (see pkg/requestid) is
+// attached to every log line automatically, without every call site
+// passing it explicitly.
 type Logger interface {
 	Info(ctx context.Context, msg string, fields ...any)
 	Debug(ctx context.Context, msg string, fields ...any)
@@ -72,19 +73,32 @@ func New(p Params) (Logger, error) {
 }
 
 func (l *logger) Info(ctx context.Context, msg string, fields ...any) {
-	l.lg.Infow(msg, fields...)
+	l.lg.Infow(msg, withRequestID(ctx, fields)...)
 }
 
 func (l *logger) Debug(ctx context.Context, msg string, fields ...any) {
-	l.lg.Debugw(msg, fields...)
+	l.lg.Debugw(msg, withRequestID(ctx, fields)...)
 }
 
 func (l *logger) Warn(ctx context.Context, msg string, fields ...any) {
-	l.lg.Warnw(msg, fields...)
+	l.lg.Warnw(msg, withRequestID(ctx, fields)...)
 }
 
 func (l *logger) Error(ctx context.Context, msg string, fields ...any) {
-	l.lg.Errorw(msg, fields...)
+	l.lg.Errorw(msg, withRequestID(ctx, fields)...)
+}
+
+// withRequestID appends a "request_id" field to fields if ctx carries
+// one (see pkg/requestid), without mutating fields' underlying array.
+func withRequestID(ctx context.Context, fields []any) []any {
+	id, ok := requestid.FromContext(ctx)
+	if !ok {
+		return fields
+	}
+
+	out := make([]any, 0, len(fields)+2)
+	out = append(out, fields...)
+	return append(out, "request_id", id)
 }
 
 // isIgnorableSyncError reports whether err is one of the well-known cases
