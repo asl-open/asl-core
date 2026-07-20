@@ -26,9 +26,9 @@ var Module = fx.Options(
 
 // Conn is the subset of *pgxpool.Pool used by callers.
 type Conn interface {
-	Exec(ctx context.Context, sql string, args ...interface{}) (pgconn.CommandTag, error)
-	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
-	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
+	Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
 	// Ping checks that the database is reachable. Used by the readiness
 	// endpoint (#10).
 	Ping(ctx context.Context) error
@@ -91,15 +91,15 @@ func New(p Params) (Conn, error) {
 	return &conn{pool: pool}, nil
 }
 
-func (c *conn) Exec(ctx context.Context, sql string, args ...interface{}) (pgconn.CommandTag, error) {
+func (c *conn) Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error) {
 	return c.pool.Exec(ctx, sql, args...)
 }
 
-func (c *conn) Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error) {
+func (c *conn) Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
 	return c.pool.Query(ctx, sql, args...)
 }
 
-func (c *conn) QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row {
+func (c *conn) QueryRow(ctx context.Context, sql string, args ...any) pgx.Row {
 	return c.pool.QueryRow(ctx, sql, args...)
 }
 

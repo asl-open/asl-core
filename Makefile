@@ -7,12 +7,14 @@ MIGRATE_BIN := $(HOME)/go/bin/migrate
 MIGRATIONS_DIR := migrations/api
 GOLANGCI_LINT_BIN := $(HOME)/go/bin/golangci-lint
 FIELDALIGNMENT_BIN := $(HOME)/go/bin/fieldalignment
+MODERNIZE_BIN := $(HOME)/go/bin/modernize
 API_CMD := ./services/api/cmd
 BUILD_OUT := bin/api
 
 .PHONY: help run build test fmt fmt-check setup-lint lint setup-fieldalignment fieldalignment \
-	fieldalignment-fix setup-migrate migrate-create migrate-up migrate-down \
-	migrate-version docker-up docker-down docker-logs
+	fieldalignment-fix go-fix go-fix-check setup-modernize modernize modernize-fix \
+	setup-migrate migrate-create migrate-up migrate-down migrate-version docker-up \
+	docker-down docker-logs
 
 ## help: show this help
 help:
@@ -61,6 +63,28 @@ fieldalignment: setup-fieldalignment
 ## fieldalignment-fix: rewrite structs in place to minimize padding
 fieldalignment-fix: setup-fieldalignment
 	$(FIELDALIGNMENT_BIN) -fix ./...
+
+## go-fix: apply the standard library's suggested API fixes (go tool fix)
+go-fix:
+	go fix ./...
+
+## go-fix-check: fail if go fix would change any file, without changing files
+go-fix-check:
+	go fix -diff ./...
+
+setup-modernize:
+	@if [ ! -x "$(MODERNIZE_BIN)" ]; then \
+		echo "Installing modernize CLI..."; \
+		go install golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest; \
+	fi
+
+## modernize: report code that could use newer Go language/library features
+modernize: setup-modernize
+	$(MODERNIZE_BIN) -diff ./...
+
+## modernize-fix: rewrite code in place to use newer Go language/library features
+modernize-fix: setup-modernize
+	$(MODERNIZE_BIN) -fix ./...
 
 setup-migrate:
 	@if [ ! -x "$(MIGRATE_BIN)" ]; then \

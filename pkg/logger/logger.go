@@ -21,10 +21,10 @@ var Module = fx.Provide(New)
 // added in #20) can be attached automatically once that lands - for now ctx
 // is unused.
 type Logger interface {
-	Info(ctx context.Context, msg string, fields ...interface{})
-	Debug(ctx context.Context, msg string, fields ...interface{})
-	Warn(ctx context.Context, msg string, fields ...interface{})
-	Error(ctx context.Context, msg string, fields ...interface{})
+	Info(ctx context.Context, msg string, fields ...any)
+	Debug(ctx context.Context, msg string, fields ...any)
+	Warn(ctx context.Context, msg string, fields ...any)
+	Error(ctx context.Context, msg string, fields ...any)
 }
 
 type Params struct {
@@ -71,19 +71,19 @@ func New(p Params) (Logger, error) {
 	return &logger{lg: log.Sugar()}, nil
 }
 
-func (l *logger) Info(ctx context.Context, msg string, fields ...interface{}) {
+func (l *logger) Info(ctx context.Context, msg string, fields ...any) {
 	l.lg.Infow(msg, fields...)
 }
 
-func (l *logger) Debug(ctx context.Context, msg string, fields ...interface{}) {
+func (l *logger) Debug(ctx context.Context, msg string, fields ...any) {
 	l.lg.Debugw(msg, fields...)
 }
 
-func (l *logger) Warn(ctx context.Context, msg string, fields ...interface{}) {
+func (l *logger) Warn(ctx context.Context, msg string, fields ...any) {
 	l.lg.Warnw(msg, fields...)
 }
 
-func (l *logger) Error(ctx context.Context, msg string, fields ...interface{}) {
+func (l *logger) Error(ctx context.Context, msg string, fields ...any) {
 	l.lg.Errorw(msg, fields...)
 }
 

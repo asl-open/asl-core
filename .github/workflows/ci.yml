@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Check formatting
+        run: make fmt-check
+
+      - name: Lint
+        run: make lint
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Start Postgres
+        uses: ./.github/actions/postgres
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Test
+        run: make test
+        env:
+          TEST_DATABASE_DSN: postgres://postgres:postgres@localhost:5439/asl_core_test?sslmode=disable
+
+      - name: Build
+        run: make build

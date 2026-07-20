@@ -11,10 +11,10 @@ import (
 	"github.com/asl-open/asl-core/pkg/database"
 )
 
-// testDSN points at a real, reachable PostgreSQL instance. These tests
-// require one to be running - there's no docker-compose (#12) or CI
-// Postgres service (#16) yet, so this is a local/manual dependency for now,
-// overridable via TEST_DATABASE_DSN.
+// testDSN points at a real, reachable PostgreSQL instance on port 5439,
+// database asl_core_test - the CI workflow provides this as a service
+// container. Locally, run one yourself (e.g. a second docker-compose
+// Postgres on that port/db) or override via TEST_DATABASE_DSN.
 var testDSN = getTestDSN()
 
 func getTestDSN() string {

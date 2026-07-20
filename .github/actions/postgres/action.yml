@@ -1,0 +1,46 @@
+name: Start Postgres
+description: Starts a disposable PostgreSQL container and waits until it accepts connections.
+
+inputs:
+  port:
+    description: Host port to bind the container's 5432 to.
+    default: "5439"
+  db:
+    description: Database name to create.
+    default: asl_core_test
+  user:
+    description: Postgres user.
+    default: postgres
+  password:
+    description: Postgres password.
+    default: postgres
+  image:
+    description: Postgres image to run.
+    default: postgres:18-alpine
+
+runs:
+  using: composite
+  steps:
+    - name: Run Postgres container
+      shell: bash
+      run: |
+        docker run -d --name ci-postgres \
+          -e POSTGRES_USER="${{ inputs.user }}" \
+          -e POSTGRES_PASSWORD="${{ inputs.password }}" \
+          -e POSTGRES_DB="${{ inputs.db }}" \
+          -p "${{ inputs.port }}:5432" \
+          "${{ inputs.image }}"
+
+    - name: Wait for Postgres to be ready
+      shell: bash
+      run: |
+        for i in $(seq 1 30); do
+          if docker exec ci-postgres pg_isready -U "${{ inputs.user }}" > /dev/null 2>&1; then
+            echo "Postgres is ready"
+            exit 0
+          fi
+          sleep 1
+        done
+        echo "Postgres did not become ready in time"
+        docker logs ci-postgres
+        exit 1
