@@ -10,7 +10,7 @@ FIELDALIGNMENT_BIN := $(HOME)/go/bin/fieldalignment
 API_CMD := ./services/api/cmd
 BUILD_OUT := bin/api
 
-.PHONY: help run build test fmt setup-lint lint setup-fieldalignment fieldalignment \
+.PHONY: help run build test fmt fmt-check setup-lint lint setup-fieldalignment fieldalignment \
 	fieldalignment-fix setup-migrate migrate-create migrate-up migrate-down \
 	migrate-version docker-up docker-down docker-logs
 
@@ -39,6 +39,10 @@ setup-lint:
 ## fmt: format all Go source files
 fmt: setup-lint
 	$(GOLANGCI_LINT_BIN) fmt ./...
+
+## fmt-check: fail if any Go source file is not formatted, without changing files
+fmt-check: setup-lint
+	$(GOLANGCI_LINT_BIN) fmt ./... --diff
 
 ## lint: run the configured linters
 lint: setup-lint
