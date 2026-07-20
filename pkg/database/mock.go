@@ -12,19 +12,19 @@ type MockConn struct {
 	mock.Mock
 }
 
-func (m *MockConn) Exec(ctx context.Context, sql string, args ...interface{}) (pgconn.CommandTag, error) {
+func (m *MockConn) Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error) {
 	called := m.Called(ctx, sql, args)
 	tag, _ := called.Get(0).(pgconn.CommandTag)
 	return tag, called.Error(1)
 }
 
-func (m *MockConn) Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error) {
+func (m *MockConn) Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
 	called := m.Called(ctx, sql, args)
 	rows, _ := called.Get(0).(pgx.Rows)
 	return rows, called.Error(1)
 }
 
-func (m *MockConn) QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row {
+func (m *MockConn) QueryRow(ctx context.Context, sql string, args ...any) pgx.Row {
 	called := m.Called(ctx, sql, args)
 	row, _ := called.Get(0).(pgx.Row)
 	return row
