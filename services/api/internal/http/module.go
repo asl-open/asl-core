@@ -14,6 +14,7 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/asl-open/asl-core/pkg/config"
+	"github.com/asl-open/asl-core/pkg/logger"
 	"github.com/asl-open/asl-core/services/api/internal/http/handlers"
 	"github.com/asl-open/asl-core/services/api/internal/http/handlers/health"
 	"github.com/asl-open/asl-core/services/api/internal/http/middleware"
@@ -30,15 +31,21 @@ type Params struct {
 	fx.Lifecycle
 
 	Config        config.Config
+	Logger        logger.Logger
 	Middleware    middleware.Middleware
 	HealthHandler health.Handler
 }
 
+// New's Params is taken by value, not pointer, because it embeds fx.In -
+// dig (Fx's DI container) rejects a pointer to an In struct at wire time
+// ("cannot depend on a pointer to a parameter object, use a value instead").
+//
+//nolint:gocritic // fx.In structs must be received by value, see above
 func New(p Params) error {
 	engine := gin.New()
 	engine.Use(p.Middleware.RequestID(), p.Middleware.Errors(), p.Middleware.Logging())
 
-	registerRoutes(engine, p)
+	registerRoutes(engine, &p)
 
 	server := &http.Server{
 		Handler:           engine,
@@ -63,13 +70,22 @@ func New(p Params) error {
 
 			return nil
 		},
-		OnStop: func(ctx context.Context) error {
-			if err := server.Shutdown(ctx); err != nil {
-				return fmt.Errorf("failed to shut down http server: %w", err)
-			}
-			return nil
-		},
+		OnStop: shutdownHook(p.Logger, server.Shutdown),
 	})
 
 	return nil
+}
+
+// shutdownHook wraps shutdown (typically (*http.Server).Shutdown) into an
+// fx OnStop hook that logs and wraps any error, rather than letting it
+// surface only through Fx's own event logger.
+func shutdownHook(log logger.Logger, shutdown func(context.Context) error) func(context.Context) error {
+	return func(ctx context.Context) error {
+		if err := shutdown(ctx); err != nil {
+			wrapped := fmt.Errorf("failed to shut down http server: %w", err)
+			log.Error(ctx, "http server shutdown failed", "error", wrapped)
+			return wrapped
+		}
+		return nil
+	}
 }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/asl-open/asl-core/pkg/config"
 	"github.com/asl-open/asl-core/pkg/database"
+	"github.com/asl-open/asl-core/pkg/logger"
 )
 
 // testDSN points at a real, reachable PostgreSQL instance on port 5439,
@@ -34,6 +35,7 @@ func newParams(t *testing.T, dsn string) database.Params {
 	return database.Params{
 		Lifecycle: fxtest.NewLifecycle(t),
 		Config:    cfg,
+		Logger:    &logger.MockLogger{},
 	}
 }
 

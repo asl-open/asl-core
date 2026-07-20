@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -25,7 +26,7 @@ func newTestEngine(checker *servicehealth.MockChecker) *gin.Engine {
 	engine.Use(mw.Errors())
 
 	h := health.New(health.Params{Checker: checker, Logger: &logger.MockLogger{}})
-	registerRoutes(engine, Params{HealthHandler: h})
+	registerRoutes(engine, &Params{HealthHandler: h})
 
 	return engine
 }
@@ -70,5 +71,41 @@ func TestRegisterRoutes_Ready(t *testing.T) {
 		require.JSONEq(t, `{"status":"unavailable"}`, rec.Body.String())
 		require.NotContains(t, rec.Body.String(), "connection refused",
 			"must not leak internal error details to the client")
+	})
+}
+
+// recordingLogger wraps MockLogger's no-op Info/Debug/Warn with an Error
+// that records what it was called with.
+type recordingLogger struct {
+	*logger.MockLogger
+	errors []string
+}
+
+func (r *recordingLogger) Error(_ context.Context, msg string, _ ...any) {
+	r.errors = append(r.errors, msg)
+}
+
+func TestShutdownHook(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		hook := shutdownHook(&logger.MockLogger{}, func(context.Context) error {
+			return nil
+		})
+
+		require.NoError(t, hook(t.Context()))
+	})
+
+	t.Run("logs and wraps the error on failure", func(t *testing.T) {
+		recLogger := &recordingLogger{MockLogger: &logger.MockLogger{}}
+		shutdownErr := errors.New("connection reset")
+
+		hook := shutdownHook(recLogger, func(context.Context) error {
+			return shutdownErr
+		})
+
+		err := hook(t.Context())
+
+		require.Error(t, err)
+		require.ErrorIs(t, err, shutdownErr)
+		require.NotEmpty(t, recLogger.errors, "a shutdown failure must be logged")
 	})
 }

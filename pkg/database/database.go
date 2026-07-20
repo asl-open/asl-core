@@ -13,6 +13,7 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/asl-open/asl-core/pkg/config"
+	"github.com/asl-open/asl-core/pkg/logger"
 )
 
 // Module provides Conn. fx.Provide alone is lazy - nothing consumes Conn
@@ -39,6 +40,7 @@ type Params struct {
 	fx.Lifecycle
 
 	Config config.Config
+	Logger logger.Logger
 }
 
 type conn struct {
@@ -82,13 +84,21 @@ func New(p Params) (Conn, error) {
 	}
 
 	p.Append(fx.Hook{
-		OnStop: func(ctx context.Context) error {
-			pool.Close()
-			return nil
-		},
+		OnStop: shutdownHook(p.Logger, pool.Close),
 	})
 
 	return &conn{pool: pool}, nil
+}
+
+// shutdownHook wraps closePool (typically (*pgxpool.Pool).Close) into an fx
+// OnStop hook that logs the shutdown, rather than letting the pool close
+// silently.
+func shutdownHook(log logger.Logger, closePool func()) func(context.Context) error {
+	return func(ctx context.Context) error {
+		closePool()
+		log.Info(ctx, "database connection pool closed")
+		return nil
+	}
 }
 
 func (c *conn) Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error) {

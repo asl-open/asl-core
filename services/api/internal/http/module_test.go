@@ -37,6 +37,7 @@ func TestNew(t *testing.T) {
 		err = apihttp.New(apihttp.Params{
 			Lifecycle:     lifecycle,
 			Config:        cfg,
+			Logger:        &logger.MockLogger{},
 			Middleware:    newTestMiddleware(),
 			HealthHandler: health.NewMockHandler(),
 		})
@@ -57,6 +58,7 @@ func TestNew(t *testing.T) {
 		err = apihttp.New(apihttp.Params{
 			Lifecycle:     lifecycle,
 			Config:        cfg,
+			Logger:        &logger.MockLogger{},
 			Middleware:    newTestMiddleware(),
 			HealthHandler: health.NewMockHandler(),
 		})
