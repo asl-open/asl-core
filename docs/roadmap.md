@@ -88,7 +88,8 @@ licensing (#40).
 A separate, compact backend for a single teacher — their students,
 payments and private courses — is deferred to a future, separate project.
 It is expected to consume Core through the public API, not share its
-database. See the [README non-goals](../README.md#non-goals).
+database. See the [README non-goals](../README.md#non-goals) and
+[`boundary.md`](boundary.md) for the boundary and integration contract.
 
 ## Tracking
 
