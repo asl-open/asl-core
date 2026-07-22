@@ -32,6 +32,22 @@ go.work.sum
 configs/*.local.yaml
 configs/*.local.yml
 
+# Secrets, keys and certificates (never commit — see SECURITY.md)
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+id_rsa
+id_rsa.*
+*credentials.json
+secrets.yaml
+secrets.yml
+
+# Database dumps
+*.dump
+*.sql.gz
+
 # Logs
 *.log
 logs/
