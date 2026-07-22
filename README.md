@@ -105,6 +105,9 @@ Additional independently deployable services (for example identity, media
 or search) may be split out later as the platform grows. Each service is
 designed to be independently runnable and deployable.
 
+Significant architecture decisions are recorded as
+[Architecture Decision Records](docs/adr/).
+
 ## Content Governance
 
 ASL Core does not independently issue fatwas or claim religious authority.
