@@ -68,7 +68,9 @@ ASL Core is deliberately scoped to the public content platform. It is **not**:
 A separate, compact backend for a single teacher — their students,
 payments and private courses — is **deferred to a future, separate
 project** and is out of scope for Core. Such products are expected to
-consume Core through its public API rather than share its database.
+consume Core through its public API rather than share its database. See
+[`docs/boundary.md`](docs/boundary.md) for the public/private boundary and
+the integration contract.
 
 ## Technology
 
