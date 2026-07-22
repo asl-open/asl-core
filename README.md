@@ -146,6 +146,14 @@ content platform, in dependency order:
 See [`docs/roadmap.md`](docs/roadmap.md) for the detailed roadmap and the
 tracking issues.
 
+## Security
+
+Please report vulnerabilities privately via GitHub's "Report a
+vulnerability" flow, not in public issues. See [`SECURITY.md`](SECURITY.md)
+for the reporting process, the secret-management baseline (secrets are
+environment-only; credentials, keys, tokens and dumps are never committed)
+and the rules for handling any future stored secrets.
+
 ## Contributing
 
 Contribution guidelines will be added before the first public development milestone.
