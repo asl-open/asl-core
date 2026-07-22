@@ -4,15 +4,29 @@ Open-source backend platform for managing, reviewing, versioning and publishing 
 
 ## Status
 
-The project is currently in the architecture and foundation stage.
+The repository foundation is complete. The project is now entering the
+content-platform stage: the domain model, editorial workflow and public
+API. The API, database model and content workflow are not yet stable.
 
-The API, database model and content workflow are not yet stable.
+See [`docs/roadmap.md`](docs/roadmap.md) for the current roadmap.
 
 ## Purpose
 
-ASL Core provides backend infrastructure for Islamic educational applications, websites, mobile apps, Telegram bots and other services.
+ASL Core is a platform for storing, verifying, versioning and publishing
+structured Islamic educational content for reuse by websites, mobile apps,
+Telegram bots and other services.
 
-The platform focuses on structured content management rather than replacing existing Quran, Hadith or prayer-time APIs.
+Its focus is:
+
+* public, verified resources;
+* exact, citable sources;
+* transparent authorship — original author, translator and reviewer credited;
+* editorial review before publication;
+* versions and a transparent revision history;
+* a public API for reuse.
+
+The platform manages structured content rather than replacing existing
+Quran, Hadith or prayer-time APIs.
 
 Initial content areas may include:
 
@@ -33,11 +47,28 @@ Initial content areas may include:
 * Microservice Architecture
 * Content separated from application code
 * Every religious claim should reference a source
+* Transparent attribution — original author, translator and reviewer credited
 * Editorial review before publication
 * Versioned content
 * Multilingual support
 * Transparent audit history
 * Clear separation between source text, translation and commentary
+
+## Non-goals
+
+ASL Core is deliberately scoped to the public content platform. It is **not**:
+
+* an online school;
+* a payments or billing system;
+* a student cabinet or personal student accounts;
+* a student progress-tracking platform;
+* a replacement for existing Quran, Hadith or prayer-time APIs;
+* a service that independently issues fatwas or claims religious authority.
+
+A separate, compact backend for a single teacher — their students,
+payments and private courses — is **deferred to a future, separate
+project** and is out of scope for Core. Such products are expected to
+consume Core through its public API rather than share its database.
 
 ## Technology
 
@@ -60,21 +91,19 @@ Gin is used as the HTTP framework, while Uber Fx is used for dependency injectio
 
 Each service owns its business rules, application services, persistence logic and HTTP transport.
 
-Initial services may include:
+The current focus is a single `api` service that owns the P0 resources:
 
-* Identity
-* Organizations
-* Content
-* Taxonomy
 * Sources
-* Editorial
-* Localization
-* Publishing
-* Media
-* Audit
-* Search
+* Contributors and reviewers
+* Knowledge entries
+* Source references
+* Revisions
+* Editorial review
+* Published releases
 
-Each service is designed to be independently runnable and deployable.
+Additional independently deployable services (for example identity, media
+or search) may be split out later as the platform grows. Each service is
+designed to be independently runnable and deployable.
 
 ## Content Governance
 
@@ -97,21 +126,22 @@ Religious content must not be published without an explicit review workflow.
 Current phase:
 
 ```text
-Foundation
+Content platform
 ```
 
-Planned early milestones:
+The repository foundation (configuration, logging, database, migrations,
+HTTP transport, OpenAPI, CI) is complete. The next milestones build the
+content platform, in dependency order:
 
-1. Repository foundation
-2. Configuration and logging
-3. Database connection and migrations
-4. Identity and RBAC
-5. Content model
-6. Sources
-7. Editorial workflow
-8. Versioning
-9. Publishing
-10. Public API
+1. Project direction, ADRs, governance and verification rules
+2. Source catalogue and contributor/reviewer profiles
+3. Knowledge entries, source references and revisions
+4. Editorial review and published releases
+5. Public API (entries and sources), filtering, caching and integration tests
+6. The first published Taharah dataset
+
+See [`docs/roadmap.md`](docs/roadmap.md) for the detailed roadmap and the
+tracking issues.
 
 ## Contributing
 
