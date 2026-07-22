@@ -61,8 +61,26 @@ history or test fixture:
 certificates, database dumps and local data directories as a safety net —
 but the primary control is not committing them in the first place.
 
-Automated secret scanning to enforce this in CI is tracked separately in
-issue #42.
+### Automated scanning
+
+[gitleaks](https://github.com/gitleaks/gitleaks) scans the repository for
+committed secrets and **fails the build** on any finding. It runs in CI on
+every push and pull request (the `secret-scan` job in
+`.github/workflows/ci.yml`, over the full git history) and can be run
+locally at any time:
+
+```
+make secret-scan
+```
+
+The ruleset is gitleaks' defaults plus a small project allowlist in
+[`.gitleaks.toml`](.gitleaks.toml) (for example the placeholder
+`services/api/.env.example` and the local `postgres:postgres` development
+DSN). Add to the allowlist only values that are provably safe by design.
+
+Enabling GitHub's native **push protection** and **secret scanning** for
+the repository (Settings → Code security) is recommended as an additional
+layer that blocks secrets before they are pushed.
 
 ### If a secret is exposed
 

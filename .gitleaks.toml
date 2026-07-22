@@ -1,0 +1,25 @@
+# gitleaks configuration for ASL Core.
+# Runs in CI (see .github/workflows/ci.yml) and locally via `make secret-scan`.
+# See SECURITY.md for the secret-management baseline this enforces.
+
+title = "ASL Core gitleaks config"
+
+# Start from gitleaks' built-in ruleset (AWS keys, private keys, generic
+# tokens, etc.) and layer the project-specific allowlist on top.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Values and paths that are safe by design and must not fail the scan"
+
+# Committed example env file: contains only placeholder / local-development
+# values (see SECURITY.md), never real credentials.
+paths = [
+  '''services/api/\.env\.example''',
+]
+
+# The local-development PostgreSQL DSN used in docs, compose and the example
+# env file. These are throwaway local credentials, not secrets.
+regexes = [
+  '''postgres://postgres:postgres@''',
+]
