@@ -10,6 +10,7 @@ FIELDALIGNMENT_BIN := $(HOME)/go/bin/fieldalignment
 MODERNIZE_BIN := $(HOME)/go/bin/modernize
 SWAG_BIN := $(HOME)/go/bin/swag
 VACUUM_BIN := $(HOME)/go/bin/vacuum
+GITLEAKS_BIN := $(HOME)/go/bin/gitleaks
 API_CMD := ./services/api/cmd
 BUILD_OUT := bin/api
 OPENAPI_DIR := services/api/internal/http/docs
@@ -20,6 +21,7 @@ SWAG_DIRS := services/api/cmd,services/api/internal/http/handlers/health
 .PHONY: help run build test test-race fmt fmt-check setup-lint lint setup-fieldalignment \
 	fieldalignment fieldalignment-fix go-fix go-fix-check setup-modernize modernize \
 	modernize-fix setup-swag openapi openapi-check setup-vacuum openapi-validate \
+	setup-gitleaks secret-scan \
 	setup-migrate migrate-create migrate-up migrate-down migrate-version \
 	docker-up docker-down docker-logs
 
@@ -60,6 +62,16 @@ fmt-check: setup-lint
 ## lint: run the configured linters
 lint: setup-lint
 	$(GOLANGCI_LINT_BIN) run ./...
+
+setup-gitleaks:
+	@if [ ! -x "$(GITLEAKS_BIN)" ]; then \
+		echo "Installing gitleaks CLI..."; \
+		go install github.com/zricethezav/gitleaks/v8@latest; \
+	fi
+
+## secret-scan: scan the git history for committed secrets (gitleaks)
+secret-scan: setup-gitleaks
+	$(GITLEAKS_BIN) detect --source . --config .gitleaks.toml --redact --verbose
 
 setup-fieldalignment:
 	@if [ ! -x "$(FIELDALIGNMENT_BIN)" ]; then \
