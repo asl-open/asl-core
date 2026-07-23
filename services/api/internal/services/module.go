@@ -4,6 +4,7 @@ package services
 import (
 	"go.uber.org/fx"
 
+	"github.com/asl-open/asl-core/services/api/internal/services/contributor"
 	"github.com/asl-open/asl-core/services/api/internal/services/health"
 	"github.com/asl-open/asl-core/services/api/internal/services/source"
 )
@@ -11,4 +12,5 @@ import (
 var Module = fx.Options(
 	health.Module,
 	source.Module,
+	contributor.Module,
 )
