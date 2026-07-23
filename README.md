@@ -169,6 +169,19 @@ Religious content contributions will follow a separate review and governance pro
 
 ## License
 
-The source code license will be defined before the first public release.
+ASL Core licenses its **source code** and its **content / data**
+separately:
 
-Content licensing is handled separately from the software license.
+* **Source code** — [Apache License 2.0](LICENSE). This covers all code,
+  database migrations, tooling and configuration in this repository.
+* **Content / data** — [Creative Commons Attribution-NonCommercial 4.0
+  International (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/).
+  This covers Core's curated content: knowledge entries, commentary,
+  Core-produced translations, the compiled catalogue and attribution
+  metadata. Non-commercial reuse is permitted with attribution preserved;
+  commercial reuse requires separate permission.
+
+Third-party source texts keep their own rights and are attributed per
+source; Core only ingests public-domain or permissioned material. See
+[`docs/licensing.md`](docs/licensing.md) for the full scope and
+[ADR-0005](docs/adr/0005-content-licensing-strategy.md) for the rationale.

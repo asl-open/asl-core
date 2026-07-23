@@ -43,5 +43,6 @@ Each ADR has one of the following statuses:
 | [0002](0002-modular-monorepo-with-a-single-go-module.md) | Modular monorepo with a single Go module | Accepted |
 | [0003](0003-per-resource-packages-and-http-layer-boundary.md) | Per-resource packages and the HTTP-layer boundary | Accepted |
 | [0004](0004-postgresql-with-golang-migrate.md) | PostgreSQL with golang-migrate up/down migrations | Accepted |
+| [0005](0005-content-licensing-strategy.md) | Content licensing strategy: Apache-2.0 code, CC BY-NC 4.0 content | Accepted |
 
 [adr]: https://github.com/joelparkerhenderson/architecture-decision-record
