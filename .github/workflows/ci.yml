@@ -51,6 +51,11 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
+      - name: Apply migrations
+        run: make migrate-up
+        env:
+          DATABASE_DSN: postgres://postgres:postgres@localhost:5439/asl_core_test?sslmode=disable
+
       - name: Test
         run: make test
         env:
