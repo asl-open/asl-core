@@ -127,7 +127,9 @@ The platform provides infrastructure for:
 Religious content must not be published without an explicit review workflow.
 
 The roles, content lifecycle states and review-to-publish workflow are
-defined in [`docs/governance.md`](docs/governance.md).
+defined in [`docs/governance.md`](docs/governance.md). The sourcing,
+attribution and verification requirements that gate approval are defined
+in [`docs/verification.md`](docs/verification.md).
 
 ## Development Status
 

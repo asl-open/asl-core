@@ -12,7 +12,7 @@ the contributor and reviewer profiles (#44), the knowledge-entry status
 field (#45), the editorial review decisions (#48) and the published
 releases (#49) all implement the state machine and role set defined below.
 The sourcing and attribution requirements that gate approval are specified
-separately in the verification and attribution rules (#39).
+separately in [`verification.md`](verification.md).
 
 Core does not independently issue fatwas or claim religious authority. It
 provides the infrastructure that records who authored, translated,
@@ -85,7 +85,7 @@ precondition:
 
 | From | To | Transition | Role | Precondition |
 |------|----|-----------|------|--------------|
-| `draft` | `in_review` | submit | Author (contributor / translator) | Verification checklist self-satisfied (see the verification rules, #39). |
+| `draft` | `in_review` | submit | Author (contributor / translator) | Verification checklist self-satisfied (see [`verification.md`](verification.md)). |
 | `in_review` | `changes_requested` | request changes | Reviewer | A recorded review decision with the required changes. |
 | `in_review` | `approved` | approve | Reviewer **distinct from the author** | Content satisfies the verification rules; a review decision is recorded. |
 | `changes_requested` | `in_review` | resubmit | Author | Requested changes addressed. |
@@ -146,9 +146,8 @@ a silent deletion.
 
 ## Related documents
 
-- The verification and attribution rules (#39) — the sourcing and
-  attribution requirements that gate the `in_review → approved`
-  transition.
+- [`verification.md`](verification.md) — the sourcing and attribution
+  requirements that gate the `in_review → approved` transition.
 - [`boundary.md`](boundary.md) — why only published content leaves Core.
 - [Architecture Decision Records](adr/) — the recorded architecture
   decisions behind the domain model.
